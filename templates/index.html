@@ -3,492 +3,654 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MediScan - Medical Report Analysis</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <title>MedAnalyze Pro - Medical Report Analysis</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
     <style>
+        :root {
+            --primary: #0f172a;
+            --secondary: #1e293b;
+            --accent: #3b82f6;
+            --accent-light: #60a5fa;
+            --success: #10b981;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: rgba(255, 255, 255, 0.1);
+            --glass: rgba(255, 255, 255, 0.03);
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
-        html, body {
-            width: 100%;
-            height: 100%;
-        }
-
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--primary);
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            position: relative;
+            color: var(--text);
             overflow-x: hidden;
         }
 
-        body::before {
-            content: '';
+        /* Animated Background */
+        .bg-grid {
+            position: fixed;
+            inset: 0;
+            background-image: 
+                linear-gradient(rgba(59, 130, 246, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(59, 130, 246, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+        }
+
+        .bg-glow {
+            position: fixed;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.15;
+            pointer-events: none;
+        }
+
+        .bg-glow-1 {
+            top: -200px;
+            right: -100px;
+            background: var(--accent);
+        }
+
+        .bg-glow-2 {
+            bottom: -200px;
+            left: -100px;
+            background: #8b5cf6;
+        }
+
+        /* Header */
+        .header {
             position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
-            background: 
-                radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.15) 0%, transparent 50%);
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        .container {
-            position: relative;
-            z-index: 1;
-            flex: 1;
+            right: 0;
+            padding: 20px 50px;
             display: flex;
-            flex-direction: column;
-        }
-
-        .header {
-            padding: 24px 32px;
-            display: flex;
-            justify-content: space-between;
             align-items: center;
+            justify-content: space-between;
+            z-index: 100;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
         }
 
         .logo {
             display: flex;
             align-items: center;
             gap: 12px;
-            color: white;
-            font-size: 24px;
-            font-weight: 700;
-            text-decoration: none;
-            letter-spacing: -0.5px;
         }
 
         .logo-icon {
-            font-size: 32px;
-            background: rgba(255, 255, 255, 0.2);
-            padding: 8px;
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, var(--accent) 0%, #8b5cf6 100%);
             border-radius: 12px;
-            backdrop-filter: blur(10px);
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
-        .badge {
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(10px);
-            color: rgba(255, 255, 255, 0.9);
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-size: 12px;
-            font-weight: 600;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+        .logo-icon .material-icons-round {
+            font-size: 24px;
+            color: white;
         }
 
-        .main {
-            flex: 1;
+        .logo-text {
+            font-size: 22px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--text) 0%, var(--text-muted) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        .header-badge {
             display: flex;
             align-items: center;
-            padding: 0 32px 60px 32px;
-            max-width: 1400px;
-            margin: 0 auto;
-            width: 100%;
+            gap: 8px;
+            background: var(--glass);
+            border: 1px solid var(--border);
+            padding: 8px 16px;
+            border-radius: 100px;
+            font-size: 13px;
+            color: var(--text-muted);
         }
 
-        .content {
+        .header-badge .material-icons-round {
+            font-size: 16px;
+            color: var(--success);
+        }
+
+        /* Main Content */
+        .main {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 120px 50px 50px;
+        }
+
+        .container {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 60px;
-            align-items: center;
+            gap: 80px;
+            max-width: 1200px;
             width: 100%;
+            align-items: center;
         }
 
-        .left-section h1 {
-            font-size: 56px;
-            font-weight: 700;
-            color: white;
-            line-height: 1.2;
-            margin-bottom: 20px;
-            letter-spacing: -1px;
-        }
-
-        .left-section p {
-            font-size: 18px;
-            color: rgba(255, 255, 255, 0.85);
-            margin-bottom: 32px;
-            line-height: 1.7;
+        /* Left Content */
+        .content {
             max-width: 500px;
         }
 
-        .features-list {
-            list-style: none;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            padding: 8px 16px;
+            border-radius: 100px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--accent-light);
+            margin-bottom: 24px;
         }
 
-        .features-list li {
+        .badge .material-icons-round {
+            font-size: 16px;
+        }
+
+        .content h1 {
+            font-size: 52px;
+            font-weight: 800;
+            line-height: 1.1;
+            letter-spacing: -2px;
+            margin-bottom: 20px;
+        }
+
+        .content h1 span {
+            background: linear-gradient(135deg, var(--accent) 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .content p {
+            font-size: 17px;
+            line-height: 1.7;
+            color: var(--text-muted);
+            margin-bottom: 40px;
+        }
+
+        .features {
+            display: flex;
+            gap: 30px;
+        }
+
+        .feature {
             display: flex;
             align-items: center;
-            gap: 12px;
-            font-size: 15px;
-            color: rgba(255, 255, 255, 0.9);
+            gap: 10px;
         }
 
-        .features-list li::before {
-            content: "check_circle";
-            font-family: 'Material Icons';
-            font-size: 20px;
-            color: #4ade80;
+        .feature-icon {
+            width: 36px;
+            height: 36px;
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 10px;
             display: flex;
             align-items: center;
+            justify-content: center;
         }
 
+        .feature-icon .material-icons-round {
+            font-size: 18px;
+            color: var(--accent-light);
+        }
+
+        .feature span {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        /* Upload Card */
         .upload-card {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 20px;
+            background: var(--secondary);
+            border: 1px solid var(--border);
+            border-radius: 24px;
             padding: 40px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             overflow: hidden;
-        }
-
-        .upload-card:hover {
-            background: rgba(255, 255, 255, 0.15);
-            border-color: rgba(255, 255, 255, 0.4);
-            transform: translateY(-8px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
         }
 
         .upload-card::before {
             content: '';
             position: absolute;
-            top: -50%;
-            right: -50%;
-            width: 200px;
-            height: 200px;
-            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
-            border-radius: 50%;
-        }
-
-        .upload-content {
-            position: relative;
-            z-index: 2;
-            text-align: center;
-            width: 100%;
-        }
-
-        .upload-icon {
-            font-family: 'Material Icons';
-            font-size: 56px;
-            color: rgba(255, 255, 255, 0.9);
-            margin-bottom: 16px;
-            display: block;
-        }
-
-        .upload-text {
-            margin-bottom: 8px;
-        }
-
-        .upload-text .main-text {
-            font-size: 18px;
-            font-weight: 600;
-            color: white;
-            margin-bottom: 4px;
-        }
-
-        .upload-text .sub-text {
-            font-size: 14px;
-            color: rgba(255, 255, 255, 0.7);
-        }
-
-        .file-info {
-            margin: 12px 0;
-            font-size: 13px;
-            color: #4ade80;
-            font-weight: 600;
-        }
-
-        .formats {
-            font-size: 12px;
-            color: rgba(255, 255, 255, 0.6);
-            margin-top: 12px;
-        }
-
-        input[type="file"] {
-            display: none;
-        }
-
-        .button {
-            width: 100%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 14px 24px;
-            font-size: 15px;
-            font-weight: 600;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            margin-top: 24px;
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
-        }
-
-        .button:active {
-            transform: translateY(0);
-        }
-
-        .button-icon {
-            font-family: 'Material Icons';
-            font-size: 20px;
-        }
-
-        .loader {
-            position: fixed;
             top: 0;
             left: 0;
             right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(8px);
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 999;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent) 0%, #8b5cf6 100%);
         }
 
-        .loader.active {
+        .upload-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .upload-header h2 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .upload-header p {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        /* Upload Zone */
+        .upload-zone {
+            border: 2px dashed var(--border);
+            border-radius: 16px;
+            padding: 50px 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: var(--glass);
+            margin-bottom: 24px;
+        }
+
+        .upload-zone:hover {
+            border-color: var(--accent);
+            background: rgba(59, 130, 246, 0.05);
+        }
+
+        .upload-zone.dragover {
+            border-color: var(--accent);
+            background: rgba(59, 130, 246, 0.1);
+            transform: scale(1.02);
+        }
+
+        .upload-icon-wrapper {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(139, 92, 246, 0.2) 100%);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+        }
+
+        .upload-icon-wrapper .material-icons-round {
+            font-size: 32px;
+            color: var(--accent-light);
+        }
+
+        .upload-zone h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .upload-zone p {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        .upload-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--accent);
+            color: white;
+            padding: 10px 24px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .upload-zone:hover .upload-btn {
+            background: var(--accent-light);
+        }
+
+        .file-types {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .file-type {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        #file-input {
+            display: none;
+        }
+
+        /* File Selected */
+        .file-selected {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            padding: 14px 20px;
+            border-radius: 12px;
+            display: none;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .file-selected.show {
             display: flex;
         }
 
-        .loader-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 24px;
-            padding: 40px;
-            text-align: center;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            min-width: 320px;
+        .file-selected .material-icons-round {
+            font-size: 22px;
+            color: var(--success);
         }
 
-        .spinner {
-            width: 48px;
-            height: 48px;
-            margin: 0 auto 24px;
-            border: 3px solid #e5e5e5;
-            border-top: 3px solid #667eea;
+        .file-selected span {
+            flex: 1;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--success);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* Analyze Button */
+        .analyze-btn {
+            width: 100%;
+            padding: 18px 30px;
+            background: linear-gradient(135deg, var(--accent) 0%, #8b5cf6 100%);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-family: inherit;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .analyze-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, #8b5cf6 0%, var(--accent) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .analyze-btn:hover::before {
+            opacity: 1;
+        }
+
+        .analyze-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 40px rgba(59, 130, 246, 0.3);
+        }
+
+        .analyze-btn:disabled {
+            background: var(--secondary);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .analyze-btn:disabled::before {
+            display: none;
+        }
+
+        .analyze-btn .material-icons-round,
+        .analyze-btn span {
+            position: relative;
+            z-index: 1;
+        }
+
+        .analyze-btn .material-icons-round {
+            font-size: 22px;
+        }
+
+        /* Loader */
+        .loader {
+            display: none;
+            width: 22px;
+            height: 22px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
+            position: relative;
+            z-index: 1;
+        }
+
+        .loader.show {
+            display: block;
         }
 
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
 
-        .loader-text {
-            font-size: 18px;
-            font-weight: 600;
-            color: #1a1a1a;
-            margin-bottom: 8px;
-        }
-
-        .loader-subtext {
-            font-size: 14px;
-            color: #666;
-        }
-
+        /* Responsive */
         @media (max-width: 1024px) {
-            .main {
-                padding: 0 24px 40px 24px;
+            .container {
+                grid-template-columns: 1fr;
+                gap: 50px;
             }
 
             .content {
-                gap: 40px;
+                text-align: center;
+                max-width: 600px;
+                margin: 0 auto;
             }
 
-            .left-section h1 {
+            .features {
+                justify-content: center;
+            }
+
+            .content h1 {
                 font-size: 40px;
             }
-
-            .left-section p {
-                font-size: 16px;
-            }
         }
 
-        @media (max-width: 768px) {
+        @media (max-width: 640px) {
+            .header {
+                padding: 15px 20px;
+            }
+
             .main {
-                padding: 0 20px 30px 20px;
+                padding: 100px 20px 30px;
             }
 
-            .content {
-                grid-template-columns: 1fr;
-                gap: 30px;
-            }
-
-            .left-section h1 {
+            .content h1 {
                 font-size: 32px;
             }
 
-            .left-section p {
-                font-size: 15px;
-                max-width: 100%;
+            .features {
+                flex-direction: column;
+                gap: 15px;
             }
 
             .upload-card {
-                padding: 32px 24px;
-            }
-
-            .header {
-                padding: 16px 20px;
+                padding: 30px 20px;
             }
         }
     </style>
 </head>
 <body>
+    <div class="bg-grid"></div>
+    <div class="bg-glow bg-glow-1"></div>
+    <div class="bg-glow bg-glow-2"></div>
 
-    <div class="container">
-        <div class="header">
-            <a href="/" class="logo">
-                <div class="logo-icon">
-                    <span style="font-family: 'Material Icons'; font-size: 24px;">local_hospital</span>
-                </div>
-                <span>MediScan</span>
-            </a>
-            <div class="badge">AI-Powered Analysis</div>
+    <header class="header">
+        <div class="logo">
+            <div class="logo-icon">
+                <span class="material-icons-round">ecg</span>
+            </div>
+            <span class="logo-text">MedAnalyze</span>
         </div>
+        <div class="header-badge">
+            <span class="material-icons-round">verified</span>
+            <span>AI Powered Analysis</span>
+        </div>
+    </header>
 
-        <div class="main">
+    <main class="main">
+        <div class="container">
             <div class="content">
-                <div class="left-section">
-                    <h1>Medical Report Analysis</h1>
-                    <p>Extract key insights from patient documents in seconds using advanced AI and OCR technology.</p>
-                    
-                    <ul class="features-list">
-                        <li>Automatic extraction of conditions and medications</li>
-                        <li>Vital signs and treatment identification</li>
-                        <li>Supports PDF, images, and office documents</li>
-                        <li>HIPAA-compliant processing</li>
-                    </ul>
+                <div class="badge">
+                    <span class="material-icons-round">auto_awesome</span>
+                    <span>Advanced Medical AI</span>
                 </div>
-
-                <div class="right-section">
-                    <form method="post" enctype="multipart/form-data" onsubmit="return handleSubmit(event)">
-                        <div class="upload-card" id="upload-area">
-                            <div class="upload-content">
-                                <span class="upload-icon">description</span>
-                                <div class="upload-text">
-                                    <div class="main-text">Upload Document</div>
-                                    <div class="sub-text">Click or drag to select</div>
-                                </div>
-                                <div class="file-info" id="file-info"></div>
-                                <div class="formats">PDF, DOCX, Images, Excel</div>
-                            </div>
-                            <input type="file" id="file-input" name="file" accept=".pdf,.docx,.doc,.pptx,.ppt,.xlsx,.xls,.txt,.csv,.rtf,.png,.jpg,.jpeg,.tiff,.tif,.bmp,.gif" required>
+                <h1>Analyze Medical Reports with <span>AI Precision</span></h1>
+                <p>Upload your medical documents and get instant AI-powered analysis. Our advanced algorithms extract key insights, identify health concerns, and provide actionable recommendations.</p>
+                <div class="features">
+                    <div class="feature">
+                        <div class="feature-icon">
+                            <span class="material-icons-round">bolt</span>
                         </div>
-                        <button type="submit" class="button">
-                            <span class="button-icon">cloud_upload</span>
-                            <span>Analyze Report</span>
-                        </button>
-                    </form>
+                        <span>Instant Analysis</span>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">
+                            <span class="material-icons-round">security</span>
+                        </div>
+                        <span>Secure & Private</span>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">
+                            <span class="material-icons-round">psychology</span>
+                        </div>
+                        <span>Smart Insights</span>
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <div class="loader" id="loader">
-        <div class="loader-card">
-            <div class="spinner"></div>
-            <div class="loader-text">Analyzing Report</div>
-            <div class="loader-subtext" id="loader-status">Processing document...</div>
+            <div class="upload-card">
+                <div class="upload-header">
+                    <h2>Upload Your Report</h2>
+                    <p>Supported formats: PDF, DOCX, Images, and more</p>
+                </div>
+
+                <form action="/" method="post" enctype="multipart/form-data" id="upload-form">
+                    <div class="upload-zone" id="upload-zone">
+                        <div class="upload-icon-wrapper">
+                            <span class="material-icons-round">cloud_upload</span>
+                        </div>
+                        <h3>Drag & drop your file here</h3>
+                        <p>or click to browse from your device</p>
+                        <div class="upload-btn">
+                            <span class="material-icons-round">folder_open</span>
+                            Choose File
+                        </div>
+                        <div class="file-types">
+                            <span class="file-type">PDF</span>
+                            <span class="file-type">DOCX</span>
+                            <span class="file-type">PNG</span>
+                            <span class="file-type">JPG</span>
+                            <span class="file-type">XLSX</span>
+                        </div>
+                        <input type="file" name="report" id="file-input" accept=".pdf,.docx,.doc,.pptx,.xlsx,.xls,.png,.jpg,.jpeg,.gif,.bmp,.tiff,.webp,.txt,.csv,.rtf">
+                    </div>
+
+                    <div class="file-selected" id="file-selected">
+                        <span class="material-icons-round">check_circle</span>
+                        <span id="file-name">filename.pdf</span>
+                    </div>
+
+                    <button type="submit" class="analyze-btn" id="analyze-btn" disabled>
+                        <span class="material-icons-round btn-icon">biotech</span>
+                        <span class="btn-text">Start Analysis</span>
+                        <div class="loader" id="loader"></div>
+                    </button>
+                </form>
+            </div>
         </div>
-    </div>
+    </main>
 
     <script>
-        const uploadArea = document.getElementById('upload-area');
+        const uploadZone = document.getElementById('upload-zone');
         const fileInput = document.getElementById('file-input');
-        const fileInfo = document.getElementById('file-info');
+        const fileSelected = document.getElementById('file-selected');
+        const fileName = document.getElementById('file-name');
+        const analyzeBtn = document.getElementById('analyze-btn');
+        const btnIcon = document.querySelector('.btn-icon');
+        const btnText = document.querySelector('.btn-text');
         const loader = document.getElementById('loader');
-        const loaderStatus = document.getElementById('loader-status');
+        const form = document.getElementById('upload-form');
 
-        const statuses = [
-            'Extracting text with OCR...',
-            'Analyzing medical content...',
-            'Identifying key information...',
-            'Finalizing results...'
-        ];
-        let statusIndex = 0;
+        uploadZone.addEventListener('click', () => fileInput.click());
 
-        function updateStatus() {
-            loaderStatus.textContent = statuses[statusIndex % statuses.length];
-            statusIndex++;
-            if (loader.classList.contains('active')) {
-                setTimeout(updateStatus, 1200);
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
+        });
+
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('dragover');
+        });
+
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            if (e.dataTransfer.files.length) {
+                fileInput.files = e.dataTransfer.files;
+                updateFileName();
             }
-        }
-
-        uploadArea.addEventListener('click', () => fileInput.click());
-
-        uploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadArea.style.background = 'rgba(255, 255, 255, 0.25)';
-            uploadArea.style.borderColor = 'rgba(255, 255, 255, 0.6)';
         });
 
-        uploadArea.addEventListener('dragleave', () => {
-            uploadArea.style.background = 'rgba(255, 255, 255, 0.1)';
-            uploadArea.style.borderColor = 'rgba(255, 255, 255, 0.2)';
-        });
+        fileInput.addEventListener('change', updateFileName);
 
-        uploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadArea.style.background = 'rgba(255, 255, 255, 0.1)';
-            uploadArea.style.borderColor = 'rgba(255, 255, 255, 0.2)';
-            fileInput.files = e.dataTransfer.files;
-            updateFileInfo();
-        });
-
-        fileInput.addEventListener('change', updateFileInfo);
-
-        function updateFileInfo() {
+        function updateFileName() {
             if (fileInput.files.length > 0) {
-                const file = fileInput.files[0];
-                const size = (file.size / 1024 / 1024).toFixed(2);
-                fileInfo.textContent = `✓ ${file.name} (${size} MB)`;
+                fileName.textContent = fileInput.files[0].name;
+                fileSelected.classList.add('show');
+                analyzeBtn.disabled = false;
+            } else {
+                fileSelected.classList.remove('show');
+                analyzeBtn.disabled = true;
             }
         }
 
-        function handleSubmit(e) {
-            if (!fileInput.files.length) {
-                e.preventDefault();
-                return false;
-            }
-            loader.classList.add('active');
-            statusIndex = 0;
-            updateStatus();
-            return true;
-        }
+        form.addEventListener('submit', function() {
+            btnIcon.style.display = 'none';
+            btnText.textContent = 'Analyzing...';
+            loader.classList.add('show');
+            analyzeBtn.disabled = true;
+        });
     </script>
-
 </body>
 </html>

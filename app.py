@@ -116,7 +116,7 @@ def call_online_ai(prompt):
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
-        file = request.files['file']
+        file = request.files['report']
         if file:
             filename = file.filename
             content = ""
