@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediScan - Medical Report Analysis</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.15) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            padding: 24px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: white;
+            font-size: 24px;
+            font-weight: 700;
+            text-decoration: none;
+            letter-spacing: -0.5px;
+        }
+
+        .logo-icon {
+            font-size: 32px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .badge {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            color: rgba(255, 255, 255, 0.9);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .main {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            padding: 0 32px 60px 32px;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+            width: 100%;
+        }
+
+        .left-section h1 {
+            font-size: 56px;
+            font-weight: 700;
+            color: white;
+            line-height: 1.2;
+            margin-bottom: 20px;
+            letter-spacing: -1px;
+        }
+
+        .left-section p {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.85);
+            margin-bottom: 32px;
+            line-height: 1.7;
+            max-width: 500px;
+        }
+
+        .features-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .features-list li {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 15px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .features-list li::before {
+            content: "check_circle";
+            font-family: 'Material Icons';
+            font-size: 20px;
+            color: #4ade80;
+            display: flex;
+            align-items: center;
+        }
+
+        .upload-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-card:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.4);
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .upload-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .upload-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            width: 100%;
+        }
+
+        .upload-icon {
+            font-family: 'Material Icons';
+            font-size: 56px;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 16px;
+            display: block;
+        }
+
+        .upload-text {
+            margin-bottom: 8px;
+        }
+
+        .upload-text .main-text {
+            font-size: 18px;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 4px;
+        }
+
+        .upload-text .sub-text {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .file-info {
+            margin: 12px 0;
+            font-size: 13px;
+            color: #4ade80;
+            font-weight: 600;
+        }
+
+        .formats {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 12px;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .button {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            font-size: 15px;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-top: 24px;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+        }
+
+        .button:active {
+            transform: translateY(0);
+        }
+
+        .button-icon {
+            font-family: 'Material Icons';
+            font-size: 20px;
+        }
+
+        .loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(8px);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+        }
+
+        .loader.active {
+            display: flex;
+        }
+
+        .loader-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            min-width: 320px;
+        }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 24px;
+            border: 3px solid #e5e5e5;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loader-text {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+        }
+
+        .loader-subtext {
+            font-size: 14px;
+            color: #666;
+        }
+
+        @media (max-width: 1024px) {
+            .main {
+                padding: 0 24px 40px 24px;
+            }
+
+            .content {
+                gap: 40px;
+            }
+
+            .left-section h1 {
+                font-size: 40px;
+            }
+
+            .left-section p {
+                font-size: 16px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main {
+                padding: 0 20px 30px 20px;
+            }
+
+            .content {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+
+            .left-section h1 {
+                font-size: 32px;
+            }
+
+            .left-section p {
+                font-size: 15px;
+                max-width: 100%;
+            }
+
+            .upload-card {
+                padding: 32px 24px;
+            }
+
+            .header {
+                padding: 16px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <a href="/" class="logo">
+                <div class="logo-icon">
+                    <span style="font-family: 'Material Icons'; font-size: 24px;">local_hospital</span>
+                </div>
+                <span>MediScan</span>
+            </a>
+            <div class="badge">AI-Powered Analysis</div>
+        </div>
+
+        <div class="main">
+            <div class="content">
+                <div class="left-section">
+                    <h1>Medical Report Analysis</h1>
+                    <p>Extract key insights from patient documents in seconds using advanced AI and OCR technology.</p>
+                    
+                    <ul class="features-list">
+                        <li>Automatic extraction of conditions and medications</li>
+                        <li>Vital signs and treatment identification</li>
+                        <li>Supports PDF, images, and office documents</li>
+                        <li>HIPAA-compliant processing</li>
+                    </ul>
+                </div>
+
+                <div class="right-section">
+                    <form method="post" enctype="multipart/form-data" onsubmit="return handleSubmit(event)">
+                        <div class="upload-card" id="upload-area">
+                            <div class="upload-content">
+                                <span class="upload-icon">description</span>
+                                <div class="upload-text">
+                                    <div class="main-text">Upload Document</div>
+                                    <div class="sub-text">Click or drag to select</div>
+                                </div>
+                                <div class="file-info" id="file-info"></div>
+                                <div class="formats">PDF, DOCX, Images, Excel</div>
+                            </div>
+                            <input type="file" id="file-input" name="file" accept=".pdf,.docx,.doc,.pptx,.ppt,.xlsx,.xls,.txt,.csv,.rtf,.png,.jpg,.jpeg,.tiff,.tif,.bmp,.gif" required>
+                        </div>
+                        <button type="submit" class="button">
+                            <span class="button-icon">cloud_upload</span>
+                            <span>Analyze Report</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="loader" id="loader">
+        <div class="loader-card">
+            <div class="spinner"></div>
+            <div class="loader-text">Analyzing Report</div>
+            <div class="loader-subtext" id="loader-status">Processing document...</div>
+        </div>
+    </div>
+
+    <script>
+        const uploadArea = document.getElementById('upload-area');
+        const fileInput = document.getElementById('file-input');
+        const fileInfo = document.getElementById('file-info');
+        const loader = document.getElementById('loader');
+        const loaderStatus = document.getElementById('loader-status');
+
+        const statuses = [
+            'Extracting text with OCR...',
+            'Analyzing medical content...',
+            'Identifying key information...',
+            'Finalizing results...'
+        ];
+        let statusIndex = 0;
+
+        function updateStatus() {
+            loaderStatus.textContent = statuses[statusIndex % statuses.length];
+            statusIndex++;
+            if (loader.classList.contains('active')) {
+                setTimeout(updateStatus, 1200);
+            }
+        }
+
+        uploadArea.addEventListener('click', () => fileInput.click());
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.style.background = 'rgba(255, 255, 255, 0.25)';
+            uploadArea.style.borderColor = 'rgba(255, 255, 255, 0.6)';
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.style.background = 'rgba(255, 255, 255, 0.1)';
+            uploadArea.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.style.background = 'rgba(255, 255, 255, 0.1)';
+            uploadArea.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+            fileInput.files = e.dataTransfer.files;
+            updateFileInfo();
+        });
+
+        fileInput.addEventListener('change', updateFileInfo);
+
+        function updateFileInfo() {
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                const size = (file.size / 1024 / 1024).toFixed(2);
+                fileInfo.textContent = `✓ ${file.name} (${size} MB)`;
+            }
+        }
+
+        function handleSubmit(e) {
+            if (!fileInput.files.length) {
+                e.preventDefault();
+                return false;
+            }
+            loader.classList.add('active');
+            statusIndex = 0;
+            updateStatus();
+            return true;
+        }
+    </script>
+
+</body>
+</html>

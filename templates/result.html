@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediScan - Analysis Results</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.15) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            padding: 24px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: white;
+            font-size: 22px;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            font-family: 'Material Icons';
+            font-size: 28px;
+        }
+
+        .btn-back {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-back:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 48px 32px;
+        }
+
+        .results-header {
+            margin-bottom: 40px;
+        }
+
+        .results-header h1 {
+            font-size: 40px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .results-header p {
+            color: rgba(255, 255, 255, 0.75);
+            font-size: 16px;
+        }
+
+        .summary-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 40px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .summary-card:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .summary-card h2 {
+            font-size: 18px;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .summary-card h2::before {
+            font-family: 'Material Icons';
+            font-size: 22px;
+            content: 'description';
+        }
+
+        .summary-card p {
+            color: rgba(255, 255, 255, 0.85);
+            line-height: 1.8;
+            font-size: 15px;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .result-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            padding: 24px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .result-card:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-4px);
+        }
+
+        .result-card h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .result-card h3::before {
+            font-family: 'Material Icons';
+            font-size: 20px;
+        }
+
+        .result-card.conditions h3::before { content: 'medical_information'; }
+        .result-card.medications h3::before { content: 'pill'; }
+        .result-card.vitals h3::before { content: 'favorite'; }
+        .result-card.treatments h3::before { content: 'health_and_safety'; }
+
+        .item-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .item {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.85);
+            padding: 10px 12px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .item:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .empty-state {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.5);
+            font-style: italic;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .actions {
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px 32px;
+            font-size: 15px;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-icon {
+            font-family: 'Material Icons';
+            font-size: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .main {
+                padding: 32px 20px;
+            }
+
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .results-header h1 {
+                font-size: 28px;
+            }
+
+            .header {
+                padding: 16px 20px;
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .summary-card {
+                padding: 20px;
+            }
+
+            .result-card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <a href="/" class="logo">
+                <span class="logo-icon">local_hospital</span>
+                <span>MediScan</span>
+            </a>
+            <a href="/" class="btn-back">
+                <span class="btn-icon">arrow_back</span>
+                <span>New Analysis</span>
+            </a>
+        </div>
+
+        <div class="main">
+            <div class="results-header">
+                <h1>Analysis Complete</h1>
+                <p>Review the extracted information from your medical report below.</p>
+            </div>
+
+            <div class="summary-card">
+                <h2>Summary</h2>
+                <p>{{ data.summary }}</p>
+            </div>
+
+            <div class="results-grid">
+                <div class="result-card conditions">
+                    <h3>Conditions</h3>
+                    <div class="item-list">
+                        {% if data.conditions and data.conditions|length > 0 %}
+                            {% for item in data.conditions %}
+                                <div class="item">{{ item }}</div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="empty-state">No conditions identified</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="result-card medications">
+                    <h3>Medications</h3>
+                    <div class="item-list">
+                        {% if data.medications and data.medications|length > 0 %}
+                            {% for item in data.medications %}
+                                <div class="item">{{ item }}</div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="empty-state">No medications found</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="result-card vitals">
+                    <h3>Vital Signs</h3>
+                    <div class="item-list">
+                        {% if data.vitals and data.vitals|length > 0 %}
+                            {% for item in data.vitals %}
+                                <div class="item">{{ item }}</div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="empty-state">No vitals recorded</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="result-card treatments">
+                    <h3>Treatment Plan</h3>
+                    <div class="item-list">
+                        {% if data.treatments and data.treatments|length > 0 %}
+                            {% for item in data.treatments %}
+                                <div class="item">{{ item }}</div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="empty-state">No treatments specified</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="actions">
+                <a href="/" class="btn-primary">
+                    <span class="btn-icon">cloud_upload</span>
+                    <span>Analyze Another Report</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
+
