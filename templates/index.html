@@ -3,654 +3,161 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MedAnalyze Pro - Medical Report Analysis</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <title>MediScan AI | Online Analysis</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0" />
     <style>
         :root {
-            --primary: #0f172a;
-            --secondary: #1e293b;
-            --accent: #3b82f6;
-            --accent-light: #60a5fa;
-            --success: #10b981;
-            --text: #f8fafc;
-            --text-muted: #94a3b8;
-            --border: rgba(255, 255, 255, 0.1);
-            --glass: rgba(255, 255, 255, 0.03);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+            --primary: #4F46E5;
+            --primary-hover: #4338ca;
+            --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            --glass-bg: rgba(255, 255, 255, 0.95);
+            --text-main: #1e293b;
+            --text-light: #64748b;
+            --shadow: 0 10px 30px -10px rgba(0,0,0,0.1);
         }
 
         body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background: var(--primary);
-            min-height: 100vh;
-            color: var(--text);
-            overflow-x: hidden;
-        }
-
-        /* Animated Background */
-        .bg-grid {
-            position: fixed;
-            inset: 0;
-            background-image: 
-                linear-gradient(rgba(59, 130, 246, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(59, 130, 246, 0.03) 1px, transparent 1px);
-            background-size: 50px 50px;
-            pointer-events: none;
-        }
-
-        .bg-glow {
-            position: fixed;
-            width: 600px;
-            height: 600px;
-            border-radius: 50%;
-            filter: blur(120px);
-            opacity: 0.15;
-            pointer-events: none;
-        }
-
-        .bg-glow-1 {
-            top: -200px;
-            right: -100px;
-            background: var(--accent);
-        }
-
-        .bg-glow-2 {
-            bottom: -200px;
-            left: -100px;
-            background: #8b5cf6;
-        }
-
-        /* Header */
-        .header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            padding: 20px 50px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            z-index: 100;
-            background: rgba(15, 23, 42, 0.8);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--border);
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .logo-icon {
-            width: 44px;
-            height: 44px;
-            background: linear-gradient(135deg, var(--accent) 0%, #8b5cf6 100%);
-            border-radius: 12px;
+            margin: 0;
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-        }
-
-        .logo-icon .material-icons-round {
-            font-size: 24px;
-            color: white;
-        }
-
-        .logo-text {
-            font-size: 22px;
-            font-weight: 700;
-            background: linear-gradient(135deg, var(--text) 0%, var(--text-muted) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            letter-spacing: -0.5px;
-        }
-
-        .header-badge {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            background: var(--glass);
-            border: 1px solid var(--border);
-            padding: 8px 16px;
-            border-radius: 100px;
-            font-size: 13px;
-            color: var(--text-muted);
-        }
-
-        .header-badge .material-icons-round {
-            font-size: 16px;
-            color: var(--success);
-        }
-
-        /* Main Content */
-        .main {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 120px 50px 50px;
         }
 
         .container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 80px;
-            max-width: 1200px;
             width: 100%;
-            align-items: center;
+            max-width: 480px;
+            padding: 20px;
         }
 
-        /* Left Content */
-        .content {
-            max-width: 500px;
-        }
-
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: rgba(59, 130, 246, 0.1);
-            border: 1px solid rgba(59, 130, 246, 0.2);
-            padding: 8px 16px;
-            border-radius: 100px;
-            font-size: 13px;
-            font-weight: 500;
-            color: var(--accent-light);
-            margin-bottom: 24px;
-        }
-
-        .badge .material-icons-round {
-            font-size: 16px;
-        }
-
-        .content h1 {
-            font-size: 52px;
-            font-weight: 800;
-            line-height: 1.1;
-            letter-spacing: -2px;
-            margin-bottom: 20px;
-        }
-
-        .content h1 span {
-            background: linear-gradient(135deg, var(--accent) 0%, #8b5cf6 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .content p {
-            font-size: 17px;
-            line-height: 1.7;
-            color: var(--text-muted);
-            margin-bottom: 40px;
-        }
-
-        .features {
-            display: flex;
-            gap: 30px;
-        }
-
-        .feature {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .feature-icon {
-            width: 36px;
-            height: 36px;
-            background: var(--glass);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .feature-icon .material-icons-round {
-            font-size: 18px;
-            color: var(--accent-light);
-        }
-
-        .feature span {
-            font-size: 14px;
-            font-weight: 500;
-            color: var(--text-muted);
-        }
-
-        /* Upload Card */
-        .upload-card {
-            background: var(--secondary);
-            border: 1px solid var(--border);
+        .card {
+            background: var(--glass-bg);
             border-radius: 24px;
             padding: 40px;
-            position: relative;
-            overflow: hidden;
+            text-align: center;
+            box-shadow: var(--shadow);
+            border: 1px solid white;
         }
 
-        .upload-card::before {
-            content: '';
+        .logo-icon {
+            font-size: 48px;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+
+        h1 { margin: 0 0 10px 0; color: #0f172a; letter-spacing: -0.5px; }
+        p { color: #64748b; margin-bottom: 30px; font-size: 15px; line-height: 1.5; }
+
+        /* Modern Upload Box */
+        .upload-area {
+            position: relative;
+            border: 2px dashed #cbd5e1;
+            border-radius: 16px;
+            padding: 40px 20px;
+            transition: all 0.3s ease;
+            background: #f8fafc;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        .upload-area:hover {
+            border-color: var(--primary);
+            background: #eef2ff;
+            transform: translateY(-2px);
+        }
+
+        input[type="file"] {
             position: absolute;
+            width: 100%;
+            height: 100%;
             top: 0;
             left: 0;
-            right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, var(--accent) 0%, #8b5cf6 100%);
-        }
-
-        .upload-header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .upload-header h2 {
-            font-size: 20px;
-            font-weight: 700;
-            margin-bottom: 8px;
-            letter-spacing: -0.5px;
-        }
-
-        .upload-header p {
-            font-size: 14px;
-            color: var(--text-muted);
-        }
-
-        /* Upload Zone */
-        .upload-zone {
-            border: 2px dashed var(--border);
-            border-radius: 16px;
-            padding: 50px 30px;
-            text-align: center;
+            opacity: 0;
             cursor: pointer;
-            transition: all 0.3s ease;
-            background: var(--glass);
-            margin-bottom: 24px;
         }
 
-        .upload-zone:hover {
-            border-color: var(--accent);
-            background: rgba(59, 130, 246, 0.05);
-        }
-
-        .upload-zone.dragover {
-            border-color: var(--accent);
-            background: rgba(59, 130, 246, 0.1);
-            transform: scale(1.02);
-        }
-
-        .upload-icon-wrapper {
-            width: 70px;
-            height: 70px;
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(139, 92, 246, 0.2) 100%);
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 20px;
-        }
-
-        .upload-icon-wrapper .material-icons-round {
-            font-size: 32px;
-            color: var(--accent-light);
-        }
-
-        .upload-zone h3 {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-
-        .upload-zone p {
-            font-size: 13px;
-            color: var(--text-muted);
-            margin-bottom: 16px;
-        }
-
-        .upload-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: var(--accent);
-            color: white;
-            padding: 10px 24px;
-            border-radius: 10px;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .upload-zone:hover .upload-btn {
-            background: var(--accent-light);
-        }
-
-        .file-types {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            justify-content: center;
-            margin-top: 20px;
-        }
-
-        .file-type {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 11px;
-            font-weight: 600;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        #file-input {
-            display: none;
-        }
-
-        /* File Selected */
-        .file-selected {
-            background: rgba(16, 185, 129, 0.1);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-            padding: 14px 20px;
-            border-radius: 12px;
-            display: none;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 24px;
-        }
-
-        .file-selected.show {
-            display: flex;
-        }
-
-        .file-selected .material-icons-round {
-            font-size: 22px;
-            color: var(--success);
-        }
-
-        .file-selected span {
-            flex: 1;
-            font-size: 14px;
-            font-weight: 500;
-            color: var(--success);
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        /* Analyze Button */
-        .analyze-btn {
-            width: 100%;
-            padding: 18px 30px;
-            background: linear-gradient(135deg, var(--accent) 0%, #8b5cf6 100%);
+        .btn-analyze {
+            background: var(--primary);
             color: white;
             border: none;
-            border-radius: 14px;
-            font-family: inherit;
+            padding: 16px;
+            width: 100%;
+            border-radius: 12px;
             font-size: 16px;
-            font-weight: 700;
+            font-weight: 600;
             cursor: pointer;
+            transition: 0.2s;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
         }
+        .btn-analyze:hover { background: var(--primary-hover); transform: translateY(-1px); }
 
-        .analyze-btn::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, #8b5cf6 0%, var(--accent) 100%);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .analyze-btn:hover::before {
-            opacity: 1;
-        }
-
-        .analyze-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 20px 40px rgba(59, 130, 246, 0.3);
-        }
-
-        .analyze-btn:disabled {
-            background: var(--secondary);
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-
-        .analyze-btn:disabled::before {
+        /* Loading Screen */
+        .loader-overlay {
+            position: fixed; inset: 0;
+            background: rgba(255,255,255,0.98);
             display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
         }
-
-        .analyze-btn .material-icons-round,
-        .analyze-btn span {
-            position: relative;
-            z-index: 1;
-        }
-
-        .analyze-btn .material-icons-round {
-            font-size: 22px;
-        }
-
-        /* Loader */
-        .loader {
-            display: none;
-            width: 22px;
-            height: 22px;
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-top-color: white;
+        .spinner {
+            width: 50px; height: 50px;
+            border: 4px solid #e2e8f0;
+            border-top: 4px solid var(--primary);
             border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            position: relative;
-            z-index: 1;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
         }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-        .loader.show {
-            display: block;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* Responsive */
-        @media (max-width: 1024px) {
-            .container {
-                grid-template-columns: 1fr;
-                gap: 50px;
-            }
-
-            .content {
-                text-align: center;
-                max-width: 600px;
-                margin: 0 auto;
-            }
-
-            .features {
-                justify-content: center;
-            }
-
-            .content h1 {
-                font-size: 40px;
-            }
-        }
-
-        @media (max-width: 640px) {
-            .header {
-                padding: 15px 20px;
-            }
-
-            .main {
-                padding: 100px 20px 30px;
-            }
-
-            .content h1 {
-                font-size: 32px;
-            }
-
-            .features {
-                flex-direction: column;
-                gap: 15px;
-            }
-
-            .upload-card {
-                padding: 30px 20px;
-            }
-        }
     </style>
 </head>
 <body>
-    <div class="bg-grid"></div>
-    <div class="bg-glow bg-glow-1"></div>
-    <div class="bg-glow bg-glow-2"></div>
 
-    <header class="header">
-        <div class="logo">
-            <div class="logo-icon">
-                <span class="material-icons-round">ecg</span>
-            </div>
-            <span class="logo-text">MedAnalyze</span>
-        </div>
-        <div class="header-badge">
-            <span class="material-icons-round">verified</span>
-            <span>AI Powered Analysis</span>
-        </div>
-    </header>
-
-    <main class="main">
-        <div class="container">
-            <div class="content">
-                <div class="badge">
-                    <span class="material-icons-round">auto_awesome</span>
-                    <span>Advanced Medical AI</span>
+    <div class="container">
+        <div class="card">
+            <span class="material-symbols-rounded logo-icon">cloud_upload</span>
+            <h1>MediScan Cloud</h1>
+            <p>Securely upload patient reports. Analyzed instantly via our high-speed online AI engine.</p>
+            
+            <form method="post" enctype="multipart/form-data" onsubmit="showLoader()">
+                <div class="upload-area">
+                    <span class="material-symbols-rounded" style="font-size:32px; color:var(--text-light);">description</span>
+                    <div style="font-weight: 600; margin-top:8px;">Click to Upload Report</div>
+                    <div style="font-size:13px; color:#94a3b8; margin-top:4px;">Supports PDF, Images & Text</div>
+                    <span id="filename" style="display:block; margin-top:10px; color:var(--primary); font-weight:500; font-size:14px;"></span>
+                    
+                    <input type="file" name="report" accept=".txt,.pdf,.png,.jpg,.jpeg,.docx" required onchange="showName(this)">
                 </div>
-                <h1>Analyze Medical Reports with <span>AI Precision</span></h1>
-                <p>Upload your medical documents and get instant AI-powered analysis. Our advanced algorithms extract key insights, identify health concerns, and provide actionable recommendations.</p>
-                <div class="features">
-                    <div class="feature">
-                        <div class="feature-icon">
-                            <span class="material-icons-round">bolt</span>
-                        </div>
-                        <span>Instant Analysis</span>
-                    </div>
-                    <div class="feature">
-                        <div class="feature-icon">
-                            <span class="material-icons-round">security</span>
-                        </div>
-                        <span>Secure & Private</span>
-                    </div>
-                    <div class="feature">
-                        <div class="feature-icon">
-                            <span class="material-icons-round">psychology</span>
-                        </div>
-                        <span>Smart Insights</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="upload-card">
-                <div class="upload-header">
-                    <h2>Upload Your Report</h2>
-                    <p>Supported formats: PDF, DOCX, Images, and more</p>
-                </div>
-
-                <form action="/" method="post" enctype="multipart/form-data" id="upload-form">
-                    <div class="upload-zone" id="upload-zone">
-                        <div class="upload-icon-wrapper">
-                            <span class="material-icons-round">cloud_upload</span>
-                        </div>
-                        <h3>Drag & drop your file here</h3>
-                        <p>or click to browse from your device</p>
-                        <div class="upload-btn">
-                            <span class="material-icons-round">folder_open</span>
-                            Choose File
-                        </div>
-                        <div class="file-types">
-                            <span class="file-type">PDF</span>
-                            <span class="file-type">DOCX</span>
-                            <span class="file-type">PNG</span>
-                            <span class="file-type">JPG</span>
-                            <span class="file-type">XLSX</span>
-                        </div>
-                        <input type="file" name="report" id="file-input" accept=".pdf,.docx,.doc,.pptx,.xlsx,.xls,.png,.jpg,.jpeg,.gif,.bmp,.tiff,.webp,.txt,.csv,.rtf">
-                    </div>
-
-                    <div class="file-selected" id="file-selected">
-                        <span class="material-icons-round">check_circle</span>
-                        <span id="file-name">filename.pdf</span>
-                    </div>
-
-                    <button type="submit" class="analyze-btn" id="analyze-btn" disabled>
-                        <span class="material-icons-round btn-icon">biotech</span>
-                        <span class="btn-text">Start Analysis</span>
-                        <div class="loader" id="loader"></div>
-                    </button>
-                </form>
-            </div>
+                
+                <button type="submit" class="btn-analyze">
+                    Run Analysis
+                    <span class="material-symbols-rounded">arrow_forward</span>
+                </button>
+            </form>
         </div>
-    </main>
+    </div>
+
+    <div class="loader-overlay" id="loader">
+        <div class="spinner"></div>
+        <h3 style="color: #1e293b; margin:0;">Processing Data...</h3>
+        <p style="color: #64748b; font-size: 14px;">Connecting to Online Inference Engine</p>
+    </div>
 
     <script>
-        const uploadZone = document.getElementById('upload-zone');
-        const fileInput = document.getElementById('file-input');
-        const fileSelected = document.getElementById('file-selected');
-        const fileName = document.getElementById('file-name');
-        const analyzeBtn = document.getElementById('analyze-btn');
-        const btnIcon = document.querySelector('.btn-icon');
-        const btnText = document.querySelector('.btn-text');
-        const loader = document.getElementById('loader');
-        const form = document.getElementById('upload-form');
-
-        uploadZone.addEventListener('click', () => fileInput.click());
-
-        uploadZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadZone.classList.add('dragover');
-        });
-
-        uploadZone.addEventListener('dragleave', () => {
-            uploadZone.classList.remove('dragover');
-        });
-
-        uploadZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadZone.classList.remove('dragover');
-            if (e.dataTransfer.files.length) {
-                fileInput.files = e.dataTransfer.files;
-                updateFileName();
-            }
-        });
-
-        fileInput.addEventListener('change', updateFileName);
-
-        function updateFileName() {
-            if (fileInput.files.length > 0) {
-                fileName.textContent = fileInput.files[0].name;
-                fileSelected.classList.add('show');
-                analyzeBtn.disabled = false;
-            } else {
-                fileSelected.classList.remove('show');
-                analyzeBtn.disabled = true;
-            }
+        function showLoader() { document.getElementById('loader').style.display = 'flex'; }
+        function showName(input) { 
+            if(input.files[0]) document.getElementById('filename').innerText = input.files[0].name; 
         }
-
-        form.addEventListener('submit', function() {
-            btnIcon.style.display = 'none';
-            btnText.textContent = 'Analyzing...';
-            loader.classList.add('show');
-            analyzeBtn.disabled = true;
-        });
     </script>
+
 </body>
 </html>

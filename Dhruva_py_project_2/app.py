@@ -155,6 +155,6 @@ def index():
             return render_template('result.html', data=data)
 
     return render_template('index.html', local_model_available=local_model_available)
-
+      
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=7860)
