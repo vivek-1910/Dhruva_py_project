@@ -3,118 +3,138 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MediScan AI | Online Analysis</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0" />
+    <title>MediScan AI | Clinical Intelligence</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Varela+Round&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    
     <style>
         :root {
-            --primary: #4F46E5;
-            --primary-hover: #4338ca;
-            --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-            --glass-bg: rgba(255, 255, 255, 0.95);
-            --text-main: #1e293b;
+            --primary: #0284c7; /* Medical Blue */
+            --primary-dark: #0369a1;
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --text-main: #334155;
             --text-light: #64748b;
-            --shadow: 0 10px 30px -10px rgba(0,0,0,0.1);
         }
 
         body {
-            margin: 0;
-            font-family: 'Outfit', sans-serif;
-            background: var(--bg-gradient);
+            font-family: 'Varela Round', sans-serif;
+            background-color: var(--bg);
             color: var(--text-main);
+            margin: 0;
             height: 100vh;
+            overflow: hidden; /* Full screen feel */
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Navbar */
+        .navbar {
+            background: var(--surface);
+            padding: 1rem 3rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            z-index: 10;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.25rem;
+            color: var(--primary);
+        }
+        .logo-icon { font-size: 32px; }
+
+        /* Main Layout */
+        .main-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            height: 100%;
+            max-width: 1600px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* Left Side: Info */
+        .info-section {
+            padding: 4rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .info-section h1 { font-size: 3rem; line-height: 1.2; margin-bottom: 1.5rem; color: #0f172a; }
+        .info-section p { font-size: 1.1rem; line-height: 1.6; color: var(--text-light); max-width: 500px; margin-bottom: 3rem; }
+        
+        .feature-grid { display: flex; gap: 2rem; }
+        .feature { display: flex; flex-direction: column; gap: 0.5rem; }
+        .feature span { color: var(--primary); font-size: 2rem; }
+        .feature h4 { margin: 0; }
+        .feature small { color: var(--text-light); }
+
+        /* Right Side: Upload */
+        .upload-section {
+            background: #f1f5f9;
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 2rem;
         }
-
-        .container {
-            width: 100%;
-            max-width: 480px;
-            padding: 20px;
-        }
-
-        .card {
-            background: var(--glass-bg);
+        .upload-card {
+            background: var(--surface);
+            padding: 3rem;
             border-radius: 24px;
-            padding: 40px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.08);
+            width: 100%;
+            max-width: 450px;
             text-align: center;
-            box-shadow: var(--shadow);
-            border: 1px solid white;
         }
 
-        .logo-icon {
-            font-size: 48px;
-            color: var(--primary);
-            margin-bottom: 15px;
-        }
-
-        h1 { margin: 0 0 10px 0; color: #0f172a; letter-spacing: -0.5px; }
-        p { color: #64748b; margin-bottom: 30px; font-size: 15px; line-height: 1.5; }
-
-        /* Modern Upload Box */
-        .upload-area {
-            position: relative;
+        .drop-zone {
             border: 2px dashed #cbd5e1;
             border-radius: 16px;
             padding: 40px 20px;
-            transition: all 0.3s ease;
+            margin: 20px 0;
             background: #f8fafc;
-            cursor: pointer;
-            margin-bottom: 20px;
-        }
-        .upload-area:hover {
-            border-color: var(--primary);
-            background: #eef2ff;
-            transform: translateY(-2px);
-        }
-
-        input[type="file"] {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            opacity: 0;
+            position: relative;
+            transition: 0.3s;
             cursor: pointer;
         }
+        .drop-zone:hover { border-color: var(--primary); background: #eff6ff; }
+        .drop-icon { font-size: 48px; color: var(--primary); margin-bottom: 10px; }
+        
+        /* IMPORTANT: Input name matches 'report' in app.py */
+        input[type="file"] { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
 
-        .btn-analyze {
+        .btn-primary {
             background: var(--primary);
             color: white;
             border: none;
             padding: 16px;
             width: 100%;
             border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
+            font-family: 'Varela Round', sans-serif;
+            font-size: 1rem;
             cursor: pointer;
-            transition: 0.2s;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
-            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+            gap: 10px;
+            transition: 0.2s;
         }
-        .btn-analyze:hover { background: var(--primary-hover); transform: translateY(-1px); }
+        .btn-primary:hover { background: var(--primary-dark); transform: translateY(-2px); }
 
-        /* Loading Screen */
-        .loader-overlay {
-            position: fixed; inset: 0;
-            background: rgba(255,255,255,0.98);
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
+        /* Loader */
+        #loader {
+            position: fixed; inset: 0; background: rgba(255,255,255,0.95);
+            display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 100;
         }
         .spinner {
-            width: 50px; height: 50px;
-            border: 4px solid #e2e8f0;
-            border-top: 4px solid var(--primary);
-            border-radius: 50%;
+            width: 60px; height: 60px; border: 6px solid #e2e8f0;
+            border-top-color: var(--primary); border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin-bottom: 20px;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
@@ -122,40 +142,76 @@
 </head>
 <body>
 
-    <div class="container">
-        <div class="card">
-            <span class="material-symbols-rounded logo-icon">cloud_upload</span>
-            <h1>MediScan Cloud</h1>
-            <p>Securely upload patient reports. Analyzed instantly via our high-speed online AI engine.</p>
+    <nav class="navbar">
+        <div class="logo">
+            <span class="material-symbols-outlined logo-icon">smart_toy</span>
+            <strong>MediScan AI</strong>
+        </div>
+        <div style="color: var(--text-light); font-size: 0.9rem;">Online Analysis v2.0</div>
+    </nav>
+
+    <div class="main-container">
+        
+        <div class="info-section">
+            <h1>Intelligent Clinical<br>Report Analysis</h1>
+            <p>Upload raw patient data (PDF/TXT) and let our cloud AI extract conditions, medications, and treatment plans instantly.</p>
             
-            <form method="post" enctype="multipart/form-data" onsubmit="showLoader()">
-                <div class="upload-area">
-                    <span class="material-symbols-rounded" style="font-size:32px; color:var(--text-light);">description</span>
-                    <div style="font-weight: 600; margin-top:8px;">Click to Upload Report</div>
-                    <div style="font-size:13px; color:#94a3b8; margin-top:4px;">Supports PDF, Images & Text</div>
-                    <span id="filename" style="display:block; margin-top:10px; color:var(--primary); font-weight:500; font-size:14px;"></span>
-                    
-                    <input type="file" name="report" accept=".txt,.pdf,.png,.jpg,.jpeg,.docx" required onchange="showName(this)">
+            <div class="feature-grid">
+                <div class="feature">
+                    <span class="material-symbols-outlined">cloud_sync</span>
+                    <h4>Cloud API</h4>
+                    <small>Powered by Cerebras</small>
                 </div>
+                <div class="feature">
+                    <span class="material-symbols-outlined">bolt</span>
+                    <h4>Fast</h4>
+                    <small>Real-time OCR</small>
+                </div>
+                <div class="feature">
+                    <span class="material-symbols-outlined">science</span>
+                    <h4>Accurate</h4>
+                    <small>Llama 3.1 Model</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="upload-section">
+            <div class="upload-card">
+                <h2 style="margin-top:0;">New Analysis</h2>
+                <p style="margin-bottom:0;">Import patient file below</p>
                 
-                <button type="submit" class="btn-analyze">
-                    Run Analysis
-                    <span class="material-symbols-rounded">arrow_forward</span>
-                </button>
-            </form>
+                <form method="post" enctype="multipart/form-data" onsubmit="showLoader()">
+                    <div class="drop-zone">
+                        <span class="material-symbols-outlined drop-icon">cloud_upload</span>
+                        <div style="font-weight: bold;">Drag & Drop or Click</div>
+                        <div style="color: #94a3b8; font-size: 0.9rem;">PDF or Text files</div>
+                        <input type="file" name="report" accept=".txt,.pdf,.png,.jpg,.jpeg,.docx" required onchange="updateFile(this)">
+                    </div>
+                    <div id="file-label" style="margin-bottom: 20px; color: var(--primary); display:none; font-weight:bold;"></div>
+                    
+                    <button type="submit" class="btn-primary">
+                        <span class="material-symbols-outlined">analytics</span>
+                        Analyze Report
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 
-    <div class="loader-overlay" id="loader">
+    <div id="loader">
         <div class="spinner"></div>
-        <h3 style="color: #1e293b; margin:0;">Processing Data...</h3>
-        <p style="color: #64748b; font-size: 14px;">Connecting to Online Inference Engine</p>
+        <h3 style="margin-top: 2rem; color: var(--text-main);">Processing Medical Data...</h3>
+        <p style="color: var(--text-light);">Connecting to Online AI Engine...</p>
     </div>
 
     <script>
         function showLoader() { document.getElementById('loader').style.display = 'flex'; }
-        function showName(input) { 
-            if(input.files[0]) document.getElementById('filename').innerText = input.files[0].name; 
+        function updateFile(input) {
+            if(input.files[0]) {
+                const label = document.getElementById('file-label');
+                label.style.display = 'block';
+                label.innerHTML = `<span class="material-symbols-outlined" style="vertical-align:middle; font-size:18px;">description</span> ${input.files[0].name}`;
+            }
         }
     </script>
 
