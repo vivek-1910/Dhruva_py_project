@@ -43,7 +43,8 @@ def load_local_model():
             try:
                 from llama_cpp import Llama
                 print(f"🔄 Loading local model...")
-                local_llm = Llama(model_path=LOCAL_MODEL_PATH, n_ctx=2048, n_threads=4, n_gpu_layers=0, verbose=False)
+                # Increased context window to 4096 for better analysis
+                local_llm = Llama(model_path=LOCAL_MODEL_PATH, n_ctx=4096, n_threads=4, n_gpu_layers=0, verbose=False)
                 print("✅ Local model loaded!")
             except Exception as e: print(f"❌ Failed to load local model: {e}")
     return local_llm
@@ -67,11 +68,49 @@ def get_mime_type(filename):
     mime_types = {'pdf': 'application/pdf', 'png': 'image/png', 'jpg': 'image/jpeg', 'jpeg': 'image/jpeg'}
     return mime_types.get(ext, 'application/octet-stream')
 
-def clean_ai_response(text):
-    text = text.replace("```json", "").replace("```", "")
-    match = re.search(r'\{.*\}', text, re.DOTALL)
-    if match: return match.group(0)
-    return text
+def smart_parse_data(text):
+    """
+    Robust Parser: Extracts JSON even if the AI adds extra text or formatting errors.
+    """
+    data = {}
+    
+    # 1. Clean Markdown Code Blocks
+    text = text.replace("```json", "").replace("```", "").strip()
+    
+    # 2. Try Standard JSON Parsing first
+    try:
+        # regex to find the largest {} block
+        match = re.search(r'\{.*\}', text, re.DOTALL)
+        if match:
+            json_str = match.group(0)
+            return json.loads(json_str)
+    except:
+        pass
+
+    # 3. Fallback: Manual Regex Extraction (If JSON is broken)
+    print("⚠️ Standard JSON failed. Attempting Regex extraction...")
+    
+    # Capture "Key": ["Value", "Value"] pattern
+    # This regex looks for string keys followed by a list
+    pattern = r'["\'](.*?)["\']\s*:\s*(\[.*?\])'
+    matches = re.findall(pattern, text, re.DOTALL)
+    
+    for key, raw_list in matches:
+        # Extract items inside the list string
+        items = re.findall(r'["\'](.*?)["\']', raw_list)
+        if items:
+            data[key] = items
+            
+    # Capture "Key": "Value" pattern (for strings like Summary)
+    summary_match = re.search(r'["\'](Summary|Patient Summary|Overview)["\']\s*:\s*["\'](.*?)["\']', text, re.IGNORECASE)
+    if summary_match:
+        data["Patient Summary"] = summary_match.group(2)
+        
+    # If empty, put raw text in a debug key
+    if not data:
+        data["Raw Analysis"] = [text]
+        
+    return data
 
 def call_online_ai(prompt):
     try:
@@ -90,7 +129,15 @@ def call_local_ai(prompt):
     try:
         llm = load_local_model()
         if llm is None: return None
-        response = llm(prompt, max_tokens=1024, stop=["</s>"], echo=False)
+        
+        # --- FIXED: Mistral Prompt Formatting ---
+        # We wrap the prompt in [INST] tags so the model follows instructions
+        formatted_prompt = f"""[INST] {prompt} 
+        
+        Ensure valid JSON output. [/INST]"""
+        
+        print("🏠 Running Local Inference...")
+        response = llm(formatted_prompt, max_tokens=1500, stop=["</s>"], echo=False)
         return response['choices'][0]['text'].strip()
     except Exception as e:
         print(f"❌ Local Model Error: {e}")
@@ -119,42 +166,36 @@ def index():
             if not content.strip():
                 return "Error: Could not extract text."
 
-            # --- DYNAMIC PROMPT (No Hardcoded Categories) ---
-            # We ask the AI to be the "Architect" of the data structure.
-            prompt = f"""Analyze the medical report below. 
+            # --- DYNAMIC PROMPT ---
+            prompt = f"""You are an expert medical AI. Analyze the medical report below.
+            
             Return a JSON object containing a detailed breakdown of the clinical data.
+            Do NOT use hardcoded keys. Dynamically create keys that best describe the data found (e.g., "Patient_Info", "Chief_Complaint", "Lab_Values", "Medications", "Imaging_Results").
             
-            Do NOT limit yourself to specific keys. Create keys that best describe the data found in the report.
-            Examples of keys you might create: "Patient Demographics", "Chief Complaint", "Clinical History", "Lab Results", "Medications", "Imaging Findings", "Plan", "Allergies", etc.
+            Values must be LISTS of strings.
             
-            Values should be lists of strings or detailed text descriptions.
-
             Medical Report:
             {content[:3000]}
 
-            Respond with ONLY the JSON object."""
+            Respond ONLY with the JSON object."""
 
             print(f"🚀 STARTING DYNAMIC ANALYSIS ({model_choice})...")
             
             if model_choice == 'local':
-                raw_text = call_local_ai(prompt) or call_online_ai(prompt)
+                raw_text = call_local_ai(prompt)
+                # Fallback to online if local fails/returns nothing
+                if not raw_text:
+                    print("⚠️ Local returned empty. Switching to Online.")
+                    raw_text = call_online_ai(prompt)
             else:
                 raw_text = call_online_ai(prompt)
             
-            cleaned_text = clean_ai_response(raw_text)
-            
-            try:
-                data = json.loads(cleaned_text)
-            except:
-                print("⚠️ JSON Parse Failed. Using Raw Text.")
-                data = {
-                    "Analysis Failed": ["Could not parse JSON."],
-                    "Raw Output": [raw_text]
-                }
+            # Use the new Smart Parser instead of basic cleaning
+            data = smart_parse_data(raw_text)
 
             return render_template('result.html', data=data)
 
     return render_template('index.html', local_model_available=local_model_available)
-      
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=7860)

@@ -635,7 +635,7 @@
             <div class="upload-card">
                 <div class="upload-header">
                     <h2>Upload Your Report</h2>
-                    <p>Supported formats: PDF, DOCX, Images, and more</p>
+                    <p>Supported formats: PDF and Text</p>
                 </div>
 
                 <form action="/" method="post" enctype="multipart/form-data" id="upload-form">
@@ -651,12 +651,9 @@
                         </div>
                         <div class="file-types">
                             <span class="file-type">PDF</span>
-                            <span class="file-type">DOCX</span>
-                            <span class="file-type">PNG</span>
-                            <span class="file-type">JPG</span>
-                            <span class="file-type">XLSX</span>
+                            <span class="file-type">TXT</span>
                         </div>
-                        <input type="file" name="report" id="file-input" accept=".pdf,.docx,.doc,.pptx,.xlsx,.xls,.png,.jpg,.jpeg,.gif,.bmp,.tiff,.webp,.txt,.csv,.rtf">
+                        <input type="file" name="report" id="file-input" accept=".pdf,.txt">
                     </div>
 
                     <div class="file-selected" id="file-selected">
@@ -664,7 +661,6 @@
                         <span id="file-name">filename.pdf</span>
                     </div>
 
-                    <!-- Model Selection -->
                     <div class="model-selection">
                         <span class="model-selection-label">Choose AI Model</span>
                         <div class="model-options">
