@@ -2,254 +2,477 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Clinical Intelligence Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedAnalyze - Report Results</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
     <style>
-        :root {
-            /* Premium Gradient Background */
-            --bg-gradient: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
-            /* Or use this for color: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); */
-            --bg-color: #f0f2f5; 
-            
-            --glass-bg: rgba(255, 255, 255, 0.95);
-            --glass-border: rgba(255, 255, 255, 0.5);
-            --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
-            
-            --primary: #4F46E5; /* Indigo */
-            --text-dark: #1e293b;
-            --text-light: #64748b;
-            
-            /* Category Colors */
-            --accent-blue: #3b82f6;
-            --accent-green: #10b981;
-            --accent-red: #ef4444;
-            --accent-purple: #8b5cf6;
-            --accent-orange: #f59e0b;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
         }
 
-        * { box-sizing: border-box; }
+        :root {
+            --bg: #09090b;
+            --bg-secondary: #0c0c0f;
+            --bg-tertiary: #111114;
+            --card: #151518;
+            --card-hover: #1a1a1e;
+            --border: #1f1f23;
+            --border-light: #2a2a2f;
+            --accent: #6366f1;
+            --accent-hover: #4f46e5;
+            --accent-soft: rgba(99, 102, 241, 0.12);
+            --green: #10b981;
+            --green-soft: rgba(16, 185, 129, 0.12);
+            --purple: #8b5cf6;
+            --purple-soft: rgba(139, 92, 246, 0.12);
+            --text: #fafafa;
+            --text-secondary: #a1a1aa;
+            --text-tertiary: #52525b;
+        }
+
+        html {
+            overflow: hidden;
+            height: 100%;
+            width: 100%;
+            overscroll-behavior: none;
+        }
 
         body {
-            font-family: 'Outfit', sans-serif;
-            background: #eef2f6; /* Fallback */
-            background-image: radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
-            background-color: #111827; /* Dark elegant background */
-            color: var(--text-dark);
-            margin: 0;
-            height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            background: var(--bg);
+            color: var(--text);
+            height: 100%;
+            width: 100%;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            overflow: hidden;
+            font-weight: 400;
+            overscroll-behavior: none;
+            position: fixed;
             display: flex;
             flex-direction: column;
-            overflow: hidden;
         }
 
-        /* Top Navigation */
-        .navbar {
-            background: rgba(17, 24, 39, 0.8);
-            backdrop-filter: blur(10px);
-            height: 70px;
-            padding: 0 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-light);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-tertiary);
+        }
+
+        /* Header */
+        .header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-secondary);
             flex-shrink: 0;
-            z-index: 100;
-        }
-        
-        .brand {
-            display: flex; align-items: center; gap: 12px;
-            font-size: 20px; color: white; font-weight: 600; letter-spacing: 0.5px;
-        }
-        
-        .btn-back {
-            text-decoration: none;
-            background: rgba(255,255,255,0.1);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 30px;
-            font-size: 14px;
-            font-weight: 500;
-            display: flex; align-items: center; gap: 8px;
-            transition: 0.3s;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        .btn-back:hover { background: rgba(255,255,255,0.2); transform: translateY(-1px); }
-
-        /* Main Grid Layout */
-        .dashboard {
-            flex-grow: 1;
-            padding: 30px 40px;
-            display: grid;
-            /* Adaptive Columns */
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            grid-auto-rows: minmax(300px, auto);
-            gap: 25px;
-            overflow-y: auto; /* Scrollable Grid */
-        }
-
-        /* Glassmorphism Card */
-        .card {
-            background: var(--glass-bg);
-            border-radius: 24px;
-            border: 1px solid white;
-            box-shadow: var(--shadow);
             display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            animation: fadeIn 0.6s ease-out forwards;
-            opacity: 0;
-            transform: translateY(20px);
+            align-items: center;
+            justify-content: space-between;
         }
 
-        /* Staggered Animation for cards */
-        .card:nth-child(1) { animation-delay: 0.1s; }
-        .card:nth-child(2) { animation-delay: 0.2s; }
-        .card:nth-child(3) { animation-delay: 0.3s; }
-        .card:nth-child(4) { animation-delay: 0.4s; }
-        .card:nth-child(5) { animation-delay: 0.5s; }
-
-        /* Special Logic for Summary (Spans 2 cols if possible) */
-        .card-summary {
-            grid-column: span 2;
-            background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%);
-        }
-        @media (max-width: 1000px) { .card-summary { grid-column: span 1; } }
-
-        /* Card Header */
-        .card-header {
-            padding: 20px 25px;
+        .header-left {
             display: flex;
             align-items: center;
             gap: 12px;
-            font-size: 15px;
-            text-transform: uppercase;
-            font-weight: 700;
-            letter-spacing: 1px;
-            border-bottom: 1px solid rgba(0,0,0,0.05);
         }
 
-        .card-body {
-            padding: 25px;
+        .header-title {
+            font-size: 24px;
+            font-weight: 400;
+            background: linear-gradient(135deg, #fff 0%, #a1a1aa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .btn-back {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 400;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .btn-back:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+        }
+
+        .btn-back:active {
+            if (navigator.vibrate) navigator.vibrate(15);
+        }
+
+        .btn-back .material-icons-round {
+            font-size: 18px;
+        }
+
+        /* Main Content */
+        .content {
+            flex: 1;
             overflow-y: auto;
-            flex-grow: 1;
-            font-size: 15px;
-            line-height: 1.7;
-            color: var(--text-dark);
+            padding: 20px;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            overscroll-behavior-y: contain;
         }
 
-        /* Scrollbar */
-        .card-body::-webkit-scrollbar { width: 6px; }
-        .card-body::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 10px; }
+        .content::-webkit-scrollbar {
+            display: none;
+        }
 
-        /* Data Items Styling */
-        .data-item {
+        /* Results Grid */
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 16px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Result Card */
+        .result-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .result-card:hover {
+            border-color: var(--border-light);
+            background: var(--card-hover);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-card-header {
+            padding: 16px;
+            background: var(--accent-soft);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .result-card-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--accent);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .result-card-icon .material-icons-round {
+            font-size: 18px;
+            color: white;
+        }
+
+        .result-card-title {
+            font-size: 14px;
+            font-weight: 400;
+            color: var(--text);
+            text-transform: capitalize;
+        }
+
+        .result-card-body {
+            padding: 16px;
+            overflow-y: auto;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .result-item {
             display: flex;
             align-items: flex-start;
-            gap: 12px;
-            margin-bottom: 12px;
-            padding: 12px;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
-            border: 1px solid rgba(0,0,0,0.03);
-            transition: 0.2s;
+            gap: 10px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            font-size: 13px;
+            line-height: 1.6;
+            color: var(--text-secondary);
         }
-        .data-item:hover { transform: translateX(5px); border-color: var(--primary); }
-        .data-item:last-child { margin-bottom: 0; }
 
-        .bullet { font-size: 18px; margin-top: 2px; }
+        .result-item .material-icons-round {
+            font-size: 16px;
+            color: var(--accent);
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
 
-        /* Empty State */
-        .empty-state {
-            height: 100%;
+        .empty-state-full {
+            padding: 30px 20px;
+            text-align: center;
+            color: var(--text-tertiary);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            color: #94a3b8;
-            font-style: italic;
-            text-align: center;
-            opacity: 0.8;
-        }
-        .empty-icon { font-size: 48px; margin-bottom: 10px; opacity: 0.3; }
-
-        @keyframes fadeIn {
-            to { opacity: 1; transform: translateY(0); }
+            gap: 12px;
         }
 
+        .empty-state-full .material-icons-round {
+            font-size: 48px;
+            opacity: 0.5;
+        }
+
+        /* Results Container */
+        .results-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* Medical Analysis Heading */
+        .medical-analysis-heading {
+            font-size: 28px;
+            font-weight: 400;
+            color: var(--text);
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .medical-analysis-heading .material-icons-round {
+            font-size: 32px;
+            color: var(--accent);
+        }
+
+        /* Summary Section */
+        .summary-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: 400;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .section-title .material-icons-round {
+            font-size: 28px;
+            color: var(--accent);
+        }
+
+        .summary-content {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* Analysis Items */
+        .analysis-item {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 18px;
+            transition: all 0.3s ease;
+            animation: slideIn 0.4s ease;
+            margin-bottom: 24px;
+        }
+
+        .analysis-item:hover {
+            border-color: var(--border-light);
+            background: var(--card-hover);
+            transform: translateY(-2px);
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .item-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .item-icon {
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent);
+            flex-shrink: 0;
+        }
+
+        .item-title {
+            font-size: 16px;
+            font-weight: 400;
+            color: var(--text);
+            text-transform: capitalize;
+        }
+
+        .item-content {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding-left: 38px;
+        }
+
+        .content-line {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-size: 14px;
+            line-height: 1.6;
+            color: var(--text-secondary);
+        }
+
+        .bullet {
+            color: var(--accent);
+            font-weight: 400;
+            flex-shrink: 0;
+        }
+
+        /* Mobile Optimization */
+        @media (max-width: 768px) {
+            .header {
+                padding: 16px;
+            }
+
+            .header-title {
+                font-size: 20px;
+            }
+
+            .content {
+                padding: 16px;
+            }
+
+            .results-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .result-card-body {
+                padding: 12px;
+                gap: 8px;
+            }
+
+            .result-item {
+                padding: 8px;
+                font-size: 12px;
+            }
+        }
     </style>
 </head>
 <body>
 
-    <nav class="navbar">
-        <div class="brand">
-            <span class="material-symbols-rounded" style="color:#60a5fa">biotech</span>
-            MediScan AI
+    <div class="header">
+        <div class="header-left">
+            <h1 class="header-title">Report Results</h1>
         </div>
         <a href="/" class="btn-back">
-            <span class="material-symbols-rounded">add_circle</span>
+            <span class="material-icons-round">arrow_back</span>
             New Report
         </a>
-    </nav>
-
-    <div class="dashboard">
-        
-        {% for key, value in data.items() %}
-            
-            {% set is_summary = 'summary' in key.lower() or 'overview' in key.lower() %}
-            
-            {% set accent_color = 'var(--text-light)' %}
-            {% set icon_name = 'info' %}
-            
-            {% if 'medication' in key.lower() %} 
-                {% set accent_color = 'var(--accent-green)' %} 
-                {% set icon_name = 'prescriptions' %}
-            {% elif 'vital' in key.lower() or 'alert' in key.lower() %} 
-                {% set accent_color = 'var(--accent-red)' %}
-                {% set icon_name = 'cardiology' %}
-            {% elif 'history' in key.lower() or 'condition' in key.lower() %} 
-                {% set accent_color = 'var(--accent-purple)' %}
-                {% set icon_name = 'history_edu' %}
-            {% elif 'plan' in key.lower() or 'recommend' in key.lower() %} 
-                {% set accent_color = 'var(--accent-orange)' %}
-                {% set icon_name = 'assignment_turned_in' %}
-            {% elif is_summary %} 
-                {% set accent_color = 'var(--accent-blue)' %}
-                {% set icon_name = 'summarize' %}
-            {% endif %}
-
-            <div class="card {% if is_summary %}card-summary{% endif %}">
-                
-                <div class="card-header" style="color: {{ accent_color }};">
-                    <span class="material-symbols-rounded" style="font-size:24px;">{{ icon_name }}</span>
-                    {{ key.replace('_', ' ') }}
-                </div>
-
-                <div class="card-body">
-                    {% if not value or (value is iterable and value is not string and value|length == 0) %}
-                        <div class="empty-state">
-                            <span class="material-symbols-rounded empty-icon">content_paste_off</span>
-                            No data extracted for {{ key.lower() }}
-                        </div>
-                    
-                    {% elif value is iterable and value is not string %}
-                        {% for item in value %}
-                            <div class="data-item">
-                                <span class="material-symbols-rounded bullet" style="color:{{ accent_color }}">check_small</span>
-                                <span>{{ item }}</span>
-                            </div>
-                        {% endfor %}
-                    
-                    {% else %}
-                        <div style="white-space: pre-wrap;">{{ value }}</div>
-                    {% endif %}
-                </div>
-            </div>
-
-        {% endfor %}
-
     </div>
+
+    <div class="content">
+        {% if data %}
+            <div class="results-container">
+                <div class="medical-analysis-heading">
+                    <span class="material-icons-round">medical_information</span>
+                    Medical Analysis
+                </div>
+                {% set key_count = 0 %}
+                {% for key, value in data.items() %}
+                    {% if value and (value is not iterable or value is string or value|length > 0) %}
+                        {% set key_lower = key.lower() %}
+                        
+                        {# Filter out unwanted keys #}
+                        {% if 'contact' not in key_lower and 'phone' not in key_lower and 'email' not in key_lower and 'address' not in key_lower and 'name' not in key_lower and 'id' not in key_lower and 'patient_id' not in key_lower and 'hospital' not in key_lower and 'clinic' not in key_lower %}
+                            
+                            {% set key_count = key_count + 1 %}
+                            
+                            <div class="analysis-item">
+                                <div class="item-header">
+                                    <span class="item-icon material-icons-round">info</span>
+                                    <h3 class="item-title">{{ key.replace('_', ' ') }}</h3>
+                                </div>
+                                <div class="item-content">
+                                    {% if value is iterable and value is not string %}
+                                        {% for item in value %}
+                                            {% if item and item|string|trim %}
+                                                <div class="content-line">
+                                                    <span class="bullet">•</span>
+                                                    <span>{{ item }}</span>
+                                                </div>
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% else %}
+                                        {% if value and value|string|trim %}
+                                            <div class="content-line">
+                                                <span>{{ value }}</span>
+                                            </div>
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state-full">
+                <span class="material-icons-round">folder_open</span>
+                <p>No analysis available</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <script>
+        // Haptic feedback for back button
+        document.querySelector('.btn-back').addEventListener('click', () => {
+            if (navigator.vibrate) navigator.vibrate(15);
+        });
+    </script>
 
 </body>
 </html>

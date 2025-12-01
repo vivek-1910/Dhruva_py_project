@@ -22,6 +22,9 @@ MODEL_FILENAME = "medical_mistral.gguf"
 LOCAL_MODEL_PATH = f"models/{MODEL_FILENAME}"
 local_llm = None
 
+# --- SESSION STORAGE FOR CHAT HISTORY ---
+chat_sessions = {}
+
 def download_model_from_hf():
     if os.path.exists(LOCAL_MODEL_PATH): return True
     try:
@@ -71,6 +74,7 @@ def get_mime_type(filename):
 def smart_parse_data(text):
     """
     Robust Parser: Extracts JSON even if the AI adds extra text or formatting errors.
+    Filters out unwanted keys like contact info, personal details, etc.
     """
     data = {}
     
@@ -83,7 +87,10 @@ def smart_parse_data(text):
         match = re.search(r'\{.*\}', text, re.DOTALL)
         if match:
             json_str = match.group(0)
-            return json.loads(json_str)
+            parsed = json.loads(json_str)
+            # Filter unwanted keys
+            filtered = filter_unwanted_keys(parsed)
+            return filtered
     except:
         pass
 
@@ -91,7 +98,6 @@ def smart_parse_data(text):
     print("⚠️ Standard JSON failed. Attempting Regex extraction...")
     
     # Capture "Key": ["Value", "Value"] pattern
-    # This regex looks for string keys followed by a list
     pattern = r'["\'](.*?)["\']\s*:\s*(\[.*?\])'
     matches = re.findall(pattern, text, re.DOTALL)
     
@@ -101,16 +107,60 @@ def smart_parse_data(text):
         if items:
             data[key] = items
             
-    # Capture "Key": "Value" pattern (for strings like Summary)
+    # Capture "Key": "Value" pattern
     summary_match = re.search(r'["\'](Summary|Patient Summary|Overview)["\']\s*:\s*["\'](.*?)["\']', text, re.IGNORECASE)
     if summary_match:
         data["Patient Summary"] = summary_match.group(2)
         
+    # Filter unwanted keys
+    filtered = filter_unwanted_keys(data)
+    
     # If empty, put raw text in a debug key
-    if not data:
-        data["Raw Analysis"] = [text]
+    if not filtered:
+        filtered["Medical Analysis"] = [text]
         
-    return data
+    return filtered
+
+def filter_unwanted_keys(data):
+    """
+    Remove unwanted keys like contact info, personal identifiers, etc.
+    Keep only clinically relevant information.
+    """
+    if not isinstance(data, dict):
+        return data
+    
+    unwanted_patterns = [
+        'contact', 'phone', 'email', 'address', 'patient_id', 'hospital_id',
+        'clinic', 'name', 'patient_name', 'doctor_name', 'provider', 
+        'id_number', 'insurance', 'account', 'mrn', 'medical_record',
+        'zip', 'postal', 'street', 'city', 'state', 'country',
+        'fax', 'mobile', 'phone_number', 'contact_person',
+        'dob', 'date_of_birth', 'age_in_years', 'sex',
+        'occupation', 'employer', 'reference', 'next_of_kin'
+    ]
+    
+    filtered = {}
+    for key, value in data.items():
+        key_lower = key.lower().replace(' ', '_')
+        
+        # Skip if key matches unwanted patterns
+        if any(pattern in key_lower for pattern in unwanted_patterns):
+            print(f"⏭️ Skipping unwanted key: {key}")
+            continue
+        
+        # Skip if value is empty
+        if not value or (isinstance(value, list) and len(value) == 0):
+            continue
+        
+        # Skip if it's just personal details
+        if isinstance(value, (str, list)):
+            value_str = str(value).lower()
+            if any(pattern in value_str for pattern in ['@', 'tel:', 'phone:', '+91', '+1']):
+                continue
+        
+        filtered[key] = value
+    
+    return filtered
 
 def call_online_ai(prompt):
     try:
@@ -124,6 +174,57 @@ def call_online_ai(prompt):
     except Exception as e:
         print(f"❌ API Error: {e}")
         return None
+
+def is_medical_text(text: str) -> bool:
+    """DEPRECATED: kept for fallback compatibility."""
+    if not text or not isinstance(text, str):
+        return False
+    return False
+
+
+def classify_medical(text: str, use_online=True) -> bool:
+    """Ask the online AI whether `text` is medical. Return True for MEDICAL.
+
+    Falls back to a small keyword heuristic if AI is unavailable.
+    """
+    if not text or not isinstance(text, str):
+        return False
+
+    sample = text.strip()[:2000]
+    prompt = (
+        "You are a classifier. Decide whether the following user-provided text is a MEDICAL document or query.\n"
+        "Respond with a single word: MEDICAL or NON-MEDICAL. Do not add any other text.\n\n"
+        f"Text:\n{sample}\n"
+    )
+
+    ai_response = None
+    if use_online:
+        try:
+            ai_response = call_online_ai(prompt)
+        except Exception:
+            ai_response = None
+
+    decision = None
+    if ai_response and isinstance(ai_response, str):
+        r = ai_response.strip().upper()
+        if 'MEDICAL' in r and 'NON-MEDICAL' not in r:
+            decision = True
+        elif 'NON-MEDICAL' in r and 'MEDICAL' not in r:
+            decision = False
+        else:
+            if 'MEDICAL' in r:
+                decision = True
+            elif 'NON-MEDICAL' in r:
+                decision = False
+    # If AI is unreachable or ambiguous, default to MEDICAL rather than hard-rejecting
+    if decision is None:
+        return True
+
+    return bool(decision)
+
+
+def is_medical_query(text: str) -> bool:
+    return classify_medical(text)
 
 def call_local_ai(prompt):
     try:
@@ -142,6 +243,50 @@ def call_local_ai(prompt):
     except Exception as e:
         print(f"❌ Local Model Error: {e}")
         return None
+
+@app.route('/chat', methods=['POST'])
+def chat():
+    """Handle multiturn medical chatbot conversations"""
+    try:
+        data = request.json
+        user_message = data.get('message', '').strip()
+        history = data.get('history', [])
+        
+        if not user_message:
+            return json.dumps({'error': 'Empty message'}), 400
+        
+        # Build conversation context from history
+        system_prompt = """You are a strict medical AI assistant. You ONLY answer medical-related questions and provide medical information, guidance, or analysis.
+        IMPORTANT: If the user's message is not related to medical topics, you MUST refuse to answer. In that case respond exactly with the sentence:
+        "I can only answer medical-related questions. Please ask a medical question."
+        Do not provide any other information, suggestions, or follow-ups for non-medical queries. Always remind users that you are not a replacement for professional medical advice when you DO answer medical questions. Keep medical responses concise and factual."""
+        
+        # Prepare messages for API
+        messages = [{"role": "system", "content": system_prompt}]
+        for msg in history[-10:]:  # Keep last 10 messages for context
+            messages.append({"role": msg['role'], "content": msg['content']})
+        messages.append({"role": "user", "content": user_message})
+        
+        # Call AI API
+        try:
+            headers = {"Content-Type": "application/json"}
+            payload = {"model": DEFAULT_MODEL, "messages": messages}
+            response = requests.post(CHAT_URL, headers=headers, json=payload, timeout=120)
+            response.raise_for_status()
+            result = response.json()
+            
+            if "choices" in result:
+                ai_reply = result["choices"][0].get("message", {}).get("content", "")
+                return json.dumps({'reply': ai_reply})
+            else:
+                return json.dumps({'error': 'Invalid API response'}), 500
+        except Exception as e:
+            print(f"❌ Chat API Error: {e}")
+            return json.dumps({'error': f'API Error: {str(e)}'}), 500
+            
+    except Exception as e:
+        print(f"❌ Chat Error: {e}")
+        return json.dumps({'error': str(e)}), 500
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -165,6 +310,15 @@ def index():
 
             if not content.strip():
                 return "Error: Could not extract text."
+
+            # Validate that the uploaded report is medical using AI classifier
+            try:
+                is_med = classify_medical(content)
+            except Exception:
+                is_med = True
+
+            if not is_med:
+                return render_template('index.html', local_model_available=local_model_available, upload_error='Please upload only medical-related reports (PDFs or text).')
 
             # --- DYNAMIC PROMPT ---
             prompt = f"""You are an expert medical AI. Analyze the medical report below.
