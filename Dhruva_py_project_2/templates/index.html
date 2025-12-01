@@ -967,7 +967,7 @@
                         </label>
 
                         <label class="option-card" data-model="local">
-                            <input type="radio" name="model_choice" value="local" disabled>
+                            <input type="radio" name="model_choice" value="local" {% if not local_model_available %}disabled{% endif %}>
                             <div class="option-header">
                                 <div class="option-icon">
                                     <span class="material-icons-round">memory</span>
@@ -1153,18 +1153,22 @@
             });
         });
 
-        // Ensure local model option is disabled and shows an explanatory alert
-        (function disableLocalOption(){
+        // If the local model option is disabled, show an explanatory alert on click
+        (function localOptionBehavior(){
             const localCard = document.querySelector('.option-card[data-model="local"]');
             if (!localCard) return;
-            // visually mark disabled
-            localCard.classList.add('disabled');
             const input = localCard.querySelector('input[type="radio"]');
-            if (input) input.disabled = true;
-            localCard.addEventListener('click', (e) => {
-                e.preventDefault();
-                alert('Local model is disabled on this deployment. Please use Cloud AI.');
-            });
+            if (!input) return;
+            if (input.disabled) {
+                localCard.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (navigator.vibrate) navigator.vibrate(12);
+                    alert('Local model is not available here. To enable it, place the local model file at: {{ LOCAL_MODEL_PATH if LOCAL_MODEL_PATH is defined else "models/medical_mistral.gguf" }} on the server.');
+                });
+                localCard.classList.add('disabled');
+            } else {
+                // allow normal selection behavior
+            }
         })();
 
         // Chat

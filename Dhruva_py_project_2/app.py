@@ -46,8 +46,8 @@ def load_local_model():
             try:
                 from llama_cpp import Llama
                 print(f"🔄 Loading local model...")
-                # Increased context window to 4096 for better analysis
-                local_llm = Llama(model_path=LOCAL_MODEL_PATH, n_ctx=4096, n_threads=4, n_gpu_layers=0, verbose=False)
+                # Reduced context to 512 for faster inference on CPU
+                local_llm = Llama(model_path=LOCAL_MODEL_PATH, n_ctx=512, n_threads=2, n_gpu_layers=0, verbose=False)
                 print("✅ Local model loaded!")
             except Exception as e: print(f"❌ Failed to load local model: {e}")
     return local_llm
@@ -226,20 +226,55 @@ def classify_medical(text: str, use_online=True) -> bool:
 def is_medical_query(text: str) -> bool:
     return classify_medical(text)
 
-def call_local_ai(prompt):
+def call_local_ai(prompt, timeout_seconds=20):
+    import time
+    import signal
+    from threading import Thread
+    
     try:
         llm = load_local_model()
         if llm is None: return None
         
-        # --- FIXED: Mistral Prompt Formatting ---
-        # We wrap the prompt in [INST] tags so the model follows instructions
-        formatted_prompt = f"""[INST] {prompt} 
+        # Truncate prompt to avoid context overflow
+        if len(prompt) > 1500:
+            prompt = prompt[:1500] + "..."
+        
+        formatted_prompt = f"""[INST] {prompt}
         
         Ensure valid JSON output. [/INST]"""
         
         print("🏠 Running Local Inference...")
-        response = llm(formatted_prompt, max_tokens=1500, stop=["</s>"], echo=False)
-        return response['choices'][0]['text'].strip()
+        start = time.time()
+        
+        result = [None]
+        error = [None]
+        
+        def run_inference():
+            try:
+                # Reduced max_tokens from 1500 to 400 for faster inference
+                resp = llm(formatted_prompt, max_tokens=400, stop=["</s>"], echo=False, temperature=0.7)
+                result[0] = resp['choices'][0]['text'].strip()
+            except Exception as ex:
+                error[0] = ex
+        
+        thread = Thread(target=run_inference)
+        thread.daemon = True
+        thread.start()
+        thread.join(timeout=timeout_seconds)
+        
+        elapsed = time.time() - start
+        
+        if thread.is_alive():
+            print(f"⏱️ Local inference timeout after {elapsed:.1f}s. Falling back to online.")
+            return None
+        
+        if error[0]:
+            print(f"❌ Local Model Error: {error[0]}")
+            return None
+        
+        print(f"✅ Local inference completed in {elapsed:.1f}s")
+        return result[0]
+        
     except Exception as e:
         print(f"❌ Local Model Error: {e}")
         return None
@@ -292,7 +327,20 @@ def chat():
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    local_model_available = True
+    # Detect whether the local model file exists and attempt to load it (fast if already loaded)
+    local_model_available = False
+    try:
+        if os.path.exists(LOCAL_MODEL_PATH):
+            # try to load the model object (load_local_model returns cached object if already loaded)
+            try:
+                llm = load_local_model()
+                local_model_available = llm is not None
+            except Exception:
+                local_model_available = False
+        else:
+            local_model_available = False
+    except Exception:
+        local_model_available = False
     
     if request.method == 'POST':
         file = request.files['report']
@@ -320,7 +368,7 @@ def index():
                 is_med = True
 
             if not is_med:
-                return render_template('index.html', local_model_available=local_model_available, upload_error='Please upload only medical-related reports (PDFs or text).')
+                return render_template('index.html', local_model_available=local_model_available, upload_error='Please upload only medical-related reports (PDFs or text).', LOCAL_MODEL_PATH=LOCAL_MODEL_PATH)
 
             # --- DYNAMIC PROMPT ---
             prompt = f"""You are an expert medical AI. Analyze the medical report below.
@@ -351,7 +399,32 @@ def index():
 
             return render_template('result.html', data=data)
 
-    return render_template('index.html', local_model_available=local_model_available)
+    return render_template('index.html', local_model_available=local_model_available, LOCAL_MODEL_PATH=LOCAL_MODEL_PATH)
+
+
+@app.route('/local_model_status', methods=['GET'])
+def local_model_status():
+    """Diagnostic endpoint: returns basic info about the local model and loading result."""
+    info = {'path': LOCAL_MODEL_PATH, 'exists': False, 'size_bytes': None, 'load': {'ok': False, 'error': None}}
+    try:
+        info['exists'] = os.path.exists(LOCAL_MODEL_PATH)
+        if info['exists']:
+            try:
+                info['size_bytes'] = os.path.getsize(LOCAL_MODEL_PATH)
+            except Exception as e:
+                info['size_bytes'] = None
+
+        # Attempt to load model (non-blocking small check)
+        try:
+            llm = load_local_model()
+            if llm is not None:
+                info['load']['ok'] = True
+        except Exception as e:
+            info['load']['error'] = str(e)
+    except Exception as e:
+        info['error'] = str(e)
+
+    return json.dumps(info)
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=7860)
